@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Math Buddy - Calculator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "surface-tint": "#005ac2",
+                        "primary": "#0058be",
+                        "surface-variant": "#d3e4fe",
+                        "error": "#ba1a1a",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#dce9ff",
+                        "secondary": "#585f67",
+                        "on-secondary-container": "#5e656d",
+                        "outline-variant": "#c2c6d6",
+                        "tertiary-container": "#a36700",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-dim": "#cbdbf5",
+                        "secondary-fixed": "#dce3ec",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#0b1c30",
+                        "inverse-on-surface": "#eaf1ff",
+                        "surface": "#f8f9ff",
+                        "surface-container": "#e5eeff",
+                        "surface-container-low": "#eff4ff",
+                        "secondary-container": "#dce3ec",
+                        "inverse-surface": "#213145",
+                        "secondary-fixed-dim": "#c0c7d0",
+                        "tertiary": "#825100",
+                        "outline": "#727785",
+                        "primary-fixed": "#d8e2ff",
+                        "on-secondary-fixed-variant": "#40484f",
+                        "on-tertiary-container": "#fffbff",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#151c23",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-surface": "#0b1c30",
+                        "surface-bright": "#f8f9ff",
+                        "primary-container": "#2170e4",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#ffddb8",
+                        "background": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "surface-container-highest": "#d3e4fe",
+                        "inverse-primary": "#adc6ff",
+                        "on-primary-container": "#fefcff",
+                        "on-surface-variant": "#424754",
+                        "on-error-container": "#93000a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "button-gap": "12px",
+                        "gutter": "12px",
+                        "margin-desktop": "40px",
+                        "margin-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-sm": ["Inter"],
+                        "button-text": ["Inter"],
+                        "label-md": ["Inter"],
+                        "history-text": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-sm": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "button-text": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "label-md": ["16px", { "lineHeight": "24px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+                        "history-text": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-lg": ["64px", { "lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .filled-icon {
+            font-variation-settings: 'FILL' 1;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .tab-button.active {
+            border-bottom: 2px solid theme('colors.primary');
+            color: theme('colors.primary');
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-display-sm">
+<!-- TopAppBar -->
+<header class="bg-surface w-full top-0 border-b border-outline-variant flex justify-between items-center px-margin-mobile h-16 shrink-0">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="calculate">calculate</span>
+<h1 class="font-display-sm text-display-sm font-semibold text-primary leading-none text-xl">Math Buddy</h1>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center justify-start p-4 gap-8 overflow-y-auto w-full">
+<!-- Calculator Container -->
+<div class="w-full max-w-sm bg-surface-container-low rounded-xl shadow-sm border border-outline-variant p-4 flex flex-col gap-4 shrink-0 mt-4">
+<!-- Error Toast (Hidden by default) -->
+<div class="hidden bg-error-container text-on-error-container font-label-md text-label-md px-4 py-2 rounded-lg text-center transition-opacity duration-300" id="error-toast">
+                Invalid Expression
+            </div>
+<!-- Display Area -->
+<div class="bg-surface-container-highest rounded-lg p-4 flex flex-col items-end justify-end h-32 border border-outline-variant shadow-inner relative overflow-hidden">
+<div class="font-history-text text-history-text text-on-surface-variant w-full text-right truncate min-h-[28px]" id="history-display"></div>
+<div class="font-display-lg text-display-lg text-on-surface w-full text-right truncate" id="main-display">0</div>
+</div>
+<!-- Keypad Grid -->
+<div class="grid grid-cols-4 gap-button-gap">
+<!-- Row 1 -->
+<button class="col-span-2 bg-error text-on-error font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-opacity-90 active:scale-95 transition-all" onclick="clearScreen()">C</button>
+<button class="bg-surface-variant text-on-surface-variant font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-high active:scale-95 transition-all" onclick="append('(')">(</button>
+<button class="bg-surface-variant text-on-surface-variant font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-high active:scale-95 transition-all" onclick="append(')')">)</button>
+<!-- Row 2 -->
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('7')">7</button>
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('8')">8</button>
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('9')">9</button>
+<button class="bg-primary-container text-on-primary-container font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-primary-container/90 active:scale-95 transition-all" onclick="append('/')">÷</button>
+<!-- Row 3 -->
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('4')">4</button>
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('5')">5</button>
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('6')">6</button>
+<button class="bg-primary-container text-on-primary-container font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-primary-container/90 active:scale-95 transition-all" onclick="append('*')">×</button>
+<!-- Row 4 -->
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('1')">1</button>
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('2')">2</button>
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('3')">3</button>
+<button class="bg-primary-container text-on-primary-container font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-primary-container/90 active:scale-95 transition-all" onclick="append('-')">−</button>
+<!-- Row 5 -->
+<button class="col-span-2 bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('0')">0</button>
+<button class="bg-surface-container-lowest text-on-surface font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-surface-container-lowest/90 active:scale-95 transition-all" onclick="append('.')">.</button>
+<button class="bg-primary-container text-on-primary-container font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-primary-container/90 active:scale-95 transition-all" onclick="append('+')">+</button>
+<!-- Row 6 -->
+<button class="col-span-4 bg-primary text-on-primary font-button-text text-button-text py-4 rounded-lg shadow-sm hover:bg-primary/90 active:scale-95 transition-all" onclick="calculate()">=</button>
+</div>
+</div>
+<!-- Code Explorer Section -->
+<div class="w-full max-w-2xl bg-surface-container rounded-xl shadow-sm border border-outline-variant p-6 mb-24 md:mb-8 flex flex-col h-full">
+<div class="flex items-center gap-2 mb-4 shrink-0">
+<span class="material-symbols-outlined text-tertiary">code</span>
+<h2 class="font-button-text text-button-text text-on-surface">Code Explorer: How It Works!</h2>
+</div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-6 shrink-0">Hey there! 👋 Ever wonder how this calculator actually works? Let's break it down! Think of a website like a body. It has a skeleton, skin, and a brain.</p>
+<!-- Tabs -->
+<div class="flex border-b border-outline-variant mb-4 shrink-0">
+<button class="tab-button active flex-1 py-2 font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors" onclick="showTab('html-tab')">HTML (Skeleton)</button>
+<button class="tab-button flex-1 py-2 font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors" onclick="showTab('css-tab')">CSS (Skin)</button>
+<button class="tab-button flex-1 py-2 font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors" onclick="showTab('js-tab')">JS (Brain)</button>
+</div>
+<!-- Tab Content Container (Scrollable) -->
+<div class="flex-grow overflow-y-auto bg-surface-container-lowest rounded-lg border border-outline-variant p-4">
+<!-- HTML Tab -->
+<div class="tab-content active" id="html-tab">
+<h3 class="font-button-text text-[20px] mb-2 text-primary">HTML is the Skeleton 🦴</h3>
+<p class="text-sm text-on-surface-variant mb-4">HTML stands for HyperText Markup Language. It builds the structure of our app. Just like bones hold you up, HTML tags hold up the website!</p>
+<div class="space-y-4">
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-primary font-bold">&lt;div&gt;</code>
+<p class="text-sm mt-1">Think of a <code class="bg-surface-variant px-1 rounded">div</code> as an invisible box. We use lots of these boxes to group things together, like grouping all the calculator buttons into one big box.</p>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-primary font-bold">&lt;button&gt;</code>
+<p class="text-sm mt-1">This creates something you can click! Every number and math symbol on our calculator is a <code class="bg-surface-variant px-1 rounded">button</code>.</p>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-primary font-bold">&lt;div id="main-display"&gt;</code>
+<p class="text-sm mt-1">This is a special box where we show the numbers you type. We give it an <code class="font-mono text-xs">id</code> so our JavaScript brain can easily find it later!</p>
+</div>
+</div>
+</div>
+<!-- CSS Tab -->
+<div class="tab-content" id="css-tab">
+<h3 class="font-button-text text-[20px] mb-2 text-tertiary-container">CSS is the Skin 🎨</h3>
+<p class="text-sm text-on-surface-variant mb-4">CSS makes things look good! It's like painting your house or choosing an outfit. We use a cool tool called Tailwind CSS.</p>
+<div class="space-y-4">
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-tertiary-container font-bold">Colors &amp; Looks</code>
+<p class="text-sm mt-1">Classes like <code class="bg-surface-variant px-1 rounded font-mono text-xs">bg-primary</code> make a button blue, and <code class="bg-surface-variant px-1 rounded font-mono text-xs">rounded-lg</code> makes the corners smooth instead of pointy.</p>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-tertiary-container font-bold">Grid Layout</code>
+<p class="text-sm mt-1">See how the buttons are perfectly lined up? We use <code class="bg-surface-variant px-1 rounded font-mono text-xs">grid grid-cols-4</code>. It tells the browser, "Make a grid with 4 equal columns!"</p>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-tertiary-container font-bold">Flexbox</code>
+<p class="text-sm mt-1">We use <code class="bg-surface-variant px-1 rounded font-mono text-xs">flex</code> to easily center things or put them side-by-side. It's super flexible (that's why it's called flex!).</p>
+</div>
+</div>
+</div>
+<!-- JS Tab -->
+<div class="tab-content" id="js-tab">
+<h3 class="font-button-text text-[20px] mb-2 text-error">JavaScript is the Brain 🧠</h3>
+<p class="text-sm text-on-surface-variant mb-4">JavaScript makes the calculator actually do math! Without it, clicking buttons would do absolutely nothing.</p>
+<div class="space-y-4">
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-error font-bold">Variables (Memory)</code>
+<p class="text-sm mt-1">We use <code class="bg-surface-variant px-1 rounded font-mono text-xs">let expression = ''</code> to remember what you typed. It's like the calculator's short-term memory.</p>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-error font-bold">append()</code>
+<p class="text-sm mt-1">When you click a button, this function runs. It takes the number you clicked and adds it to our memory. <br/><span class="text-xs text-secondary italic">"Oh, you clicked 7? I'll add that to the screen!"</span></p>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-error font-bold">clearScreen()</code>
+<p class="text-sm mt-1">This simply deletes our memory, changing the expression back to empty so we can start over.</p>
+</div>
+<div class="bg-surface p-3 rounded border border-outline-variant">
+<code class="text-error font-bold">calculate() &amp; eval()</code>
+<p class="text-sm mt-1">The magic trick! When you hit equals, we use a special built-in tool called <code class="bg-surface-variant px-1 rounded font-mono text-xs">eval()</code>. It takes a string of text like "2+2" and solves it instantly!</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden shadow-sm bg-surface-container fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 rounded-t-xl pb-6">
+<button class="text-on-surface-variant flex flex-col items-center justify-center p-2 hover:bg-surface-container-high transition-all active:scale-98">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-label-md text-label-md text-[10px] mt-1">History</span>
+</button>
+<button class="bg-primary-container text-on-primary-container rounded-full p-2 flex flex-col items-center justify-center active:scale-98 transition-all duration-200 shadow-sm w-16 h-16 -mt-6">
+<span class="material-symbols-outlined text-3xl filled-icon" data-icon="calculate">calculate</span>
+</button>
+<button class="text-on-surface-variant flex flex-col items-center justify-center p-2 hover:bg-surface-container-high transition-all active:scale-98">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md text-[10px] mt-1">Settings</span>
+</button>
+</nav>
+<script>
+        // --- The Calculator's Brain (JavaScript) ---
+
+        // Variables: This is our calculator's memory!
+        let currentExpression = ''; // Starts empty
+        let justCalculated = false; // Remembers if we just solved a math problem
+
+        // Finding the HTML elements so we can change them
+        const mainDisplay = document.getElementById('main-display');
+        const historyDisplay = document.getElementById('history-display');
+        const errorToast = document.getElementById('error-toast');
+
+        // Function to update what you see on the screen
+        function updateScreen() {
+            if (currentExpression === '') {
+                mainDisplay.textContent = '0'; // Show 0 if empty
+            } else {
+                // Make computer math symbols look nice (* becomes ×, / becomes ÷)
+                mainDisplay.textContent = currentExpression.replace(/\*/g, '×').replace(/\//g, '÷');
+            }
+        }
+
+        // Function: Adds a character to the screen
+        function append(char) {
+            hideError(); // Hide any old errors
+            
+            // If we just finished a math problem and type a new number...
+            if (justCalculated && /[0-9.]/.test(char)) {
+                currentExpression = char; // Start fresh with the new number
+                historyDisplay.textContent = '';
+            } else {
+                currentExpression += char; // Otherwise, just glue the new character to the end
+            }
+            
+            justCalculated = false; // We are typing, not calculating right now
+            updateScreen(); // Show the new text!
+        }
+
+        // Function: Resets the display to "0"
+        function clearScreen() {
+            currentExpression = ''; // Delete the memory
+            historyDisplay.textContent = ''; // Clear the top history
+            justCalculated = false;
+            hideError();
+            updateScreen(); // Screen will show '0' now
+        }
+
+        // Function: Solves the math problem and displays the answer
+        function calculate() {
+            if (currentExpression === '') return; // Do nothing if nothing is typed
+
+            try {
+                // Safety check: Only allow real math characters!
+                if (!/^[0-9+\-*/(). ]+$/.test(currentExpression)) {
+                    throw new Error("Invalid characters");
+                }
+
+                // Show what we are calculating in the small text above
+                historyDisplay.textContent = currentExpression.replace(/\*/g, '×').replace(/\//g, '÷') + ' =';
+                
+                // The Magic Trick: eval() takes a string like "5+5" and turns it into 10!
+                let result = eval(currentExpression);
+                
+                // Sometimes computers are bad at decimals (like 0.1 + 0.2 = 0.30000000000000004)
+                // This line fixes that!
+                if (!Number.isInteger(result)) {
+                    result = parseFloat(result.toFixed(8));
+                }
+
+                // Check if the answer is completely broken (like dividing by zero in a weird way)
+                if (!isFinite(result) || isNaN(result)) {
+                    throw new Error("Math Error");
+                }
+
+                // Save the answer as our new expression
+                currentExpression = result.toString();
+                justCalculated = true; // Remember that we just finished a problem
+                updateScreen(); // Show the answer!
+
+            } catch (error) {
+                // If anything goes wrong, this block catches the mistake!
+                showError("Oops! That math doesn't work.");
+                currentExpression = ''; // Reset memory
+                updateScreen();
+            }
+        }
+
+        // Helper functions for showing/hiding the red error message
+        function showError(message) {
+            errorToast.textContent = message;
+            errorToast.classList.remove('hidden');
+            setTimeout(() => {
+                errorToast.classList.add('hidden'); // Hide after 3 seconds
+            }, 3000);
+        }
+
+        function hideError() {
+            errorToast.classList.add('hidden');
+        }
+
+        // --- Tabs Logic for the Code Explorer ---
+        function showTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            
+            // Show the clicked tab content
+            document.getElementById(tabId).classList.add('active');
+            
+            // Add active styling to the clicked button
+            // Finding the button that was clicked based on its onclick attribute is tricky, 
+            // so we'll just add active to the target event in a real scenario, but here we can find it by finding the button that calls showTab(tabId)
+             document.querySelectorAll('.tab-button').forEach(btn => {
+                if(btn.getAttribute('onclick') === `showTab('${tabId}')`) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body></html>
